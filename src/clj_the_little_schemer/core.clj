@@ -28,9 +28,9 @@
      (lat? '(jack (sprat) could eat no chicken fat))))
 
 (defn member? [a lat]
-  (cond (empty? lat)      false
-        (= (first lat) a) true
-        :else             (recur a (rest lat))))
+  (when-let [[x & xs] (seq lat)]
+    (cond (= x a) true
+          :else   (recur a xs))))
 
 (comment
   ;; Non recursive version
@@ -41,14 +41,13 @@
   (= true
      (member? 'fat '(jack sprat could eat no chicken fat)))
 
-  (= false
-     (member? 'fat '(jack could eat no chicken))))
+  (nil? (member? 'fat '(jack could eat no chicken))))
 
 (defn rember [a lat]
   (lazy-seq
-   (cond (empty? lat)      lat
-         (= a (first lat)) (rest lat)
-         :else             (cons (first lat) (rember a (rest lat))))))
+   (let [[x & xs] (seq lat)]
+     (cond (= a x) xs
+           :else   (cons x (rember a xs))))))
 
 (comment
   ;; Non recursive version
@@ -62,9 +61,9 @@
 
 (defn firsts [l]
   (lazy-seq
-   (cond (empty? l) l
-         :else      (cons (first (first l))
-                          (firsts (rest l))))))
+   (when-let [[x & xs] (seq l)]
+     (cons (first x)
+           (firsts xs)))))
 
 (comment
   ;; Non recursive version
@@ -74,3 +73,18 @@
 (comment
   (= '(a c e)
      (firsts '((a b) (c d) (e f)))))
+
+(defn insertR [new old lat]
+  (lazy-seq
+   (let [[x & xs] (seq lat)]
+     (cond (= x old) (cons old (cons new xs))
+           :else     (cons x (insertR new old xs))))))
+
+(comment
+  ;; Non recursive version
+  (defn insertR [new old lat]
+    (let [[x y] (split-with #(not= old %) lat)]
+      (concat x [(first y) new] (rest y)))))
+
+(comment
+  (insertR 'b 'a '(a c d e a)))
