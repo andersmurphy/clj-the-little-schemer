@@ -166,7 +166,7 @@
 (comment
   ;; Non recursive version
   (defn multiinsertR [new old lat]
-    nil))
+    (mapcat #(if (= % old) [% new] [%]) lat)))
 
 (comment
   (= '(vanilla ice cream with banana ice cream for desert)
