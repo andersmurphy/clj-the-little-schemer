@@ -186,3 +186,18 @@
 (comment
   (= '(vanilla ice cream with banana ice cream for desert)
      (multiinsertL 'ice 'cream  '(vanilla cream with banana cream for desert))))
+
+(defn multisubst [new old lat]
+  (lazy-seq
+   (when-let [[x & xs] (seq lat)]
+     (cond (= x old) (cons new (multisubst new old xs))
+           :else     (cons x (multisubst new old xs))))))
+
+(comment
+  ;; Non recursive version
+  (defn multisubst [new old lat]
+    (map #(if (= % old) new %) lat)))
+
+(comment
+  (= '(ice cream with topping for desert)
+     (multisubst 'topping 'fudge '(ice cream with fudge for desert))))
