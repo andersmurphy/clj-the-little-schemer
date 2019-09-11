@@ -126,7 +126,7 @@
   (lazy-seq
    (let [[x & xs] (seq lat)]
      (cond (or (= x o1) (= x o2)) (cons new xs)
-           :else                  (cons x (subst2 new old xs))))))
+           :else                  (cons x (subst2 new o1 o2 xs))))))
 
 (comment
   ;; Non recursive version
@@ -156,3 +156,18 @@
 (comment
   (= '(ice cream with fudge for desert)
      (multirember 'banana '(banana ice cream with banana fudge for desert))))
+
+(defn multiinsertR [new old lat]
+  (lazy-seq
+   (when-let [[x & xs] (seq lat)]
+     (cond (= x old) (cons old (cons new (multiinsertR new old xs)))
+           :else     (cons x (multiinsertR new old xs))))))
+
+(comment
+  ;; Non recursive version
+  (defn multiinsertR [new old lat]
+    nil))
+
+(comment
+  (= '(vanilla ice cream with banana ice cream for desert)
+     (multiinsertR 'cream 'ice '(vanilla ice with banana ice for desert))))
