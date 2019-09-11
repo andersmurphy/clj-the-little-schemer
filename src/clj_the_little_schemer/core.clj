@@ -171,3 +171,18 @@
 (comment
   (= '(vanilla ice cream with banana ice cream for desert)
      (multiinsertR 'cream 'ice '(vanilla ice with banana ice for desert))))
+
+(defn multiinsertL [new old lat]
+  (lazy-seq
+   (when-let [[x & xs] (seq lat)]
+     (cond (= x old) (cons new (cons old (multiinsertL new old xs)))
+           :else     (cons x (multiinsertL new old xs))))))
+
+(comment
+  ;; Non recursive version
+  (defn multiinsertL [new old lat]
+    (mapcat #(if (= % old) [new %] [%]) lat)))
+
+(comment
+  (= '(vanilla ice cream with banana ice cream for desert)
+     (multiinsertL 'ice 'cream  '(vanilla cream with banana cream for desert))))
