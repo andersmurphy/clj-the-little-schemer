@@ -87,4 +87,72 @@
       (concat x [(first y) new] (rest y)))))
 
 (comment
-  (insertR 'b 'a '(a c d e a)))
+  (= '(ice cream with fudge topping for desert)
+     (insertR 'topping 'fudge '(ice cream with fudge for desert))))
+
+(defn insertL [new old lat]
+  (lazy-seq
+   (let [[x & xs] (seq lat)]
+     (cond (= x old) (cons new lat)
+           :else     (cons x (insertL new old xs))))))
+
+(comment
+  ;; Non recursive version
+  (defn insertL [new old lat]
+    (let [[x y] (split-with #(not= old %) lat)]
+      (concat x [new] y))))
+
+(comment
+  (= '(ice cream with topping fudge for desert)
+     (insertL 'topping 'fudge '(ice cream with fudge for desert))))
+
+(defn subst [new old lat]
+  (lazy-seq
+   (let [[x & xs] (seq lat)]
+     (cond (= x old) (cons new xs)
+           :else     (cons x (subst new old xs))))))
+
+(comment
+  ;; Non recursive version
+  (defn subst [new old lat]
+    (let [[x y] (split-with #(not= old %) lat)]
+      (concat x [new] (rest y)))))
+
+(comment
+  (= '(ice cream with topping for desert)
+     (subst 'topping 'fudge '(ice cream with fudge for desert))))
+
+(defn subst2 [new o1 o2 lat]
+  (lazy-seq
+   (let [[x & xs] (seq lat)]
+     (cond (or (= x o1) (= x o2)) (cons new xs)
+           :else                  (cons x (subst2 new old xs))))))
+
+(comment
+  ;; Non recursive version
+  (defn subst2 [new o1 o2 lat]
+    (let [[x y] (split-with #(and (not= o1 %)
+                                  (not= o2 %)) lat)]
+      (concat x [new] (rest y)))))
+
+(comment
+  (= '(ice cream with banana for desert)
+     (subst2 'banana 'fudge 'desert '(ice cream with fudge for desert)))
+
+  (= '(ice banana with fudge for desert)
+     (subst2 'banana 'fudge 'cream '(ice cream with fudge for desert))))
+
+(defn multirember [a lat]
+  (lazy-seq
+   (when-let [[x & xs] (seq lat)]
+     (cond (= a x) (multirember a xs)
+           :else   (cons x (multirember a xs))))))
+
+(comment
+  ;; Non recursive version
+  (defn multirember [a lat]
+    (remove #(= % a) lat)))
+
+(comment
+  (= '(ice cream with fudge for desert)
+     (multirember 'banana '(banana ice cream with banana fudge for desert))))
