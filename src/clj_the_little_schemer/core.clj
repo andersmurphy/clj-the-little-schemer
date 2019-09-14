@@ -201,3 +201,58 @@
 (comment
   (= '(ice cream with topping for desert)
      (multisubst 'topping 'fudge '(ice cream with fudge for desert))))
+
+(defn o+ [n m]
+  (if (zero? m)
+    n
+    (recur (inc n) (dec m))))
+
+(comment
+  ;; Non recursive version
+  (defn o+ [n m]
+    (+ n m)))
+
+(comment
+  (= 10000001
+     (o+ 1 10000000)))
+
+(defn o- [n m]
+  (if (zero? m)
+    n
+    (recur (dec n) (dec m))))
+
+(comment
+  ;; Non recursive version
+  (defn o- [n m]
+    (- n m)))
+
+(comment
+  (= -9999999
+     (o- 1 10000000)))
+
+(defn tup? [t]
+  (or (empty? t) (every? number? t)))
+
+(comment
+  (= false
+     (tup? [1 2 3 [2 3]]))
+  (= true
+     (tup? [1 2 3 ])))
+
+(defn addtup [tup]
+  (loop [acc      0
+         [x & xs] (seq tup)]
+    (if-not x
+      acc
+      (recur (+ acc x) xs))))
+
+(comment
+  ;; Non recursive versions
+  (defn addtup [tup]
+    (apply + tup))
+  (defn addtup [tup]
+    (reduce + tup)))
+
+(comment
+  (= 18
+     (addtup [3 5 2 8])))
