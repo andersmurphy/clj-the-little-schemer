@@ -259,11 +259,10 @@
 
 (defn o* [n m]
   (loop [acc 0
-         n   n
          m   m]
     (if (zero? m)
       acc
-      (recur (+ acc n) n (dec m)))))
+      (recur (+ acc n) (dec m)))))
 
 (comment
   ;; Non recursive versions
@@ -343,3 +342,19 @@
   (o= 3 4)
   (o= 8000 1333)
   (o= 3 3))
+
+(defn expt [n m]
+  (loop [acc 1
+         m   m]
+    (if (zero? m)
+      acc
+      (recur (* acc n) (dec m)))))
+
+(comment
+  ;; Non recursive versions
+  (defn expt [n m]
+    (reduce * (repeat m n))))
+
+(comment
+  (= 25 (expt 5 2))
+  (= 32 (expt 2 5)))
