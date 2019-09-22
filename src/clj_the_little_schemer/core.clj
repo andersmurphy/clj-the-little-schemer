@@ -256,3 +256,75 @@
 (comment
   (= 18
      (addtup [3 5 2 8])))
+
+(defn o* [n m]
+  (loop [acc 0
+         n   n
+         m   m]
+    (if (zero? m)
+      acc
+      (recur (+ acc n) n (dec m)))))
+
+(comment
+  ;; Non recursive versions
+  (defn o* [n m]
+    (* n m)))
+
+(comment
+  (= 25 (o* 5 5))
+  (= 5 (o* 5 1))
+  (= 0 (o* 5 0))
+  (= 0 (o* 0 4)))
+
+(defn tup+ [tup1 tup2]
+  (lazy-seq
+   (let [[x & xs] (seq tup1)
+         [y & ys] (seq tup2)]
+     (cond (empty? tup1) tup2
+           (empty? tup2) tup1
+           :else         (cons (+ x y) (tup+ xs ys))))))
+
+(comment
+  ;; Non recursive versions
+  (defn tup+ [tup1 tup2]
+    (let [[shortest longest] (sort-by count [tup1 tup2])]
+      (map + longest (concat shortest (repeat 0)))))
+
+  ;; Var args
+  (defn tup+ [& tups]
+    (let [[longest & rest] (sort-by count > tups)]
+      (apply map + (conj (map #(concat % (repeat 0)) rest) longest)))))
+
+(comment
+  (= [2 4 6 1] (tup+ [1 2 3] [1 2 3 1]))
+  (= [2 4 6 1] (tup+ [1 2 3 1]  [1 2 3])))
+
+(defn o> [n m]
+  (cond (zero? n) false
+        (zero? m) true
+        :else     (recur (dec n) (dec m))))
+
+(comment
+  ;; Non recursive versions
+  (defn o> [n m]
+    (> n m)))
+
+(comment
+  (o> 4 3)
+  (o> 1333 8000)
+  (o> 3 3))
+
+(defn o< [n m]
+  (cond (zero? m) false
+        (zero? n) true
+        :else     (recur (dec n) (dec m))))
+
+(comment
+  ;; Non recursive versions
+  (defn o< [n m]
+    (< n m)))
+
+(comment
+  (o< 3 4)
+  (o< 8000 1333)
+  (o< 3 3))
