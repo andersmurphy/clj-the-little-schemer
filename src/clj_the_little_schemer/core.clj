@@ -328,3 +328,18 @@
   (o< 3 4)
   (o< 8000 1333)
   (o< 3 3))
+
+(defn o= [n m]
+  (cond (zero? m) (zero? n)
+        (zero? n) false
+        :else     (recur (dec n) (dec m))))
+
+(comment
+  ;; Non recursive versions
+  (defn o= [n m]
+    (= n m)))
+
+(comment
+  (o= 3 4)
+  (o= 8000 1333)
+  (o= 3 3))
