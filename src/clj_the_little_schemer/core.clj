@@ -358,3 +358,19 @@
 (comment
   (= 25 (expt 5 2))
   (= 32 (expt 2 5)))
+
+(defn divide [n m]
+  (loop [acc 0
+         n   n]
+    (if (< n m)
+      acc
+      (recur (inc acc) (- n m)))))
+
+(comment
+  ;; Non recursive versions
+  (defn divide [n m]
+    (/ n m)))
+
+(comment
+  (= 5 (divide 10 2))
+  (= 5 (divide 30 6)))
