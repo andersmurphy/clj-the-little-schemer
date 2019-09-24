@@ -374,3 +374,18 @@
 (comment
   (= 5 (divide 10 2))
   (= 5 (divide 30 6)))
+
+(defn length [lat]
+  (loop [acc 0
+         lat lat]
+    (if (empty? lat)
+      acc
+      (recur (inc acc) (pop lat)))))
+
+(comment
+  ;; Non recursive versions
+  (defn length [lat]
+    (count lat)))
+
+(comment
+  (length '(hotdogs with mustard)))
