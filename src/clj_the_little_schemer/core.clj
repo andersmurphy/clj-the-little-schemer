@@ -388,4 +388,4 @@
     (count lat)))
 
 (comment
-  (length '(hotdogs with mustard)))
+  (= 3 (length '(hotdogs with mustard))))
