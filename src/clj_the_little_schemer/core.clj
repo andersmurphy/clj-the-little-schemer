@@ -389,3 +389,16 @@
 
 (comment
   (= 3 (length '(hotdogs with mustard))))
+
+(defn pick [n lat]
+  (if (zero? (dec n))
+    (first lat)
+    (recur (dec n) (drop 1 lat))))
+
+(comment
+  ;; Non recursive versions
+  (defn pick [n lat]
+    (nth lat (dec n))))
+
+(comment
+  (= 'hot (pick 3 '(hotdogs with hot mustard))))
