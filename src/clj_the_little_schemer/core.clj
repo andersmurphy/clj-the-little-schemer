@@ -402,3 +402,19 @@
 
 (comment
   (= 'hot (pick 3 '(hotdogs with hot mustard))))
+
+(defn rempick [n lat]
+  (lazy-seq
+   (let [[x & xs] (seq lat)]
+     (cond (zero? (dec n)) xs
+           :else           (cons x (rempick (dec n) xs))))))
+
+(comment
+  ;; Non recursive versions
+  (defn rempick [n lat]
+    (let [v (vec lat)]
+      (concat (subvec v 0 (dec n))
+              (subvec v n)))))
+
+(comment
+  (= '(hotdogs with mustard) (rempick 3 '(hotdogs with hot mustard))))
