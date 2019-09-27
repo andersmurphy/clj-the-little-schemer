@@ -390,10 +390,10 @@
 (comment
   (= 3 (length '(hotdogs with mustard))))
 
-(defn pick [n lat]
+(defn pick [n [x & xs]]
   (if (zero? (dec n))
-    (first lat)
-    (recur (dec n) (drop 1 lat))))
+    x
+    (recur (dec n) xs)))
 
 (comment
   ;; Non recursive versions
