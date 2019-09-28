@@ -418,3 +418,18 @@
 
 (comment
   (= '(hotdogs with mustard) (rempick 3 '(hotdogs with hot mustard))))
+
+(defn no-nums [lat]
+  (lazy-seq
+   (let [[x & xs] (seq lat)]
+     (cond (empty? lat) lat
+           (number? x)  (no-nums xs)
+           :else        (cons x (no-nums xs))))))
+
+(comment
+  ;; Non recursive versions
+  (defn no-nums [lat]
+    (remove number? lat)))
+
+(comment
+  (= '(hot mustard) (no-nums '(5 hot 3 mustard))))
