@@ -433,3 +433,18 @@
 
 (comment
   (= '(hot mustard) (no-nums '(5 hot 3 mustard))))
+
+(defn all-nums [lat]
+  (lazy-seq
+   (let [[x & xs] (seq lat)]
+     (cond (empty? lat) lat
+           (number? x)  (cons x (all-nums xs))
+           :else        (all-nums xs)))))
+
+(comment
+  ;; Non recursive versions
+  (defn all-nums [lat]
+    (filter number? lat)))
+
+(comment
+  (= '(5 3) (all-nums '(5 hot 3 mustard))))
