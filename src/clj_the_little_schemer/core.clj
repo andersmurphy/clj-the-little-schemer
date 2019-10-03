@@ -448,3 +448,18 @@
 
 (comment
   (= '(5 3) (all-nums '(5 hot 3 mustard))))
+
+(defn occur [a lat]
+  (loop [acc      0
+         [x & xs] (seq lat)]
+    (cond (nil? x) acc
+          (= x a)  (recur (inc acc) xs)
+          :else    (recur acc xs))))
+
+(comment
+  ;; Non recursive versions
+  (defn occur [a lat]
+    ((frequencies lat) a)))
+
+(comment
+  (= 4 (occur 'a '(a b c a b a a))))
