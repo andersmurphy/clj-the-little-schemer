@@ -463,3 +463,10 @@
 
 (comment
   (= 4 (occur 'a '(a b c a b a a))))
+
+(defn one? [n]
+  (= n 1))
+
+(comment
+  (true? (one? 1))
+  (false? (one? 2)))
