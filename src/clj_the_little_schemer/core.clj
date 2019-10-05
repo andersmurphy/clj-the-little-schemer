@@ -151,7 +151,7 @@
 (comment
   ;; Non recursive version
   (defn multirember [a lat]
-    (remove #(= % a) lat)))
+    (remove #{a} lat)))
 
 (comment
   (= '(ice cream with fudge for desert)
