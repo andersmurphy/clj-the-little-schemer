@@ -467,3 +467,28 @@
 (comment
   (true? (one? 1))
   (false? (one? 2)))
+
+(defn rember* [a l]
+  (lazy-seq
+   (when-let [[x & xs] (seq l)]
+     (cond (= a x)  (rember* a xs)
+           (seq? x) (cons (rember* a x) (rember* a xs))
+           :else    (cons x (rember* a xs))))))
+
+(comment
+  ;; Non recursive versions
+  (defn rember* [a l]
+    (clojure.walk/prewalk
+     (fn [x]
+       (if (seq? x)
+         (remove #{a} x)
+         x))
+     l)))
+
+(comment
+  (= '(((a))
+       ((c))
+       (d ((e))))
+     (rember* 'b '(((a b))
+                   ((c) b)
+                   (d ((e)) b)))))
