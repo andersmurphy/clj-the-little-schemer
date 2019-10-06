@@ -45,7 +45,7 @@
 
 (defn rember [a lat]
   (lazy-seq
-   (let [[x & xs] (seq lat)]
+   (when-let [[x & xs] (seq lat)]
      (cond (= a x) xs
            :else   (cons x (rember a xs))))))
 
@@ -76,7 +76,7 @@
 
 (defn insertR [new old lat]
   (lazy-seq
-   (let [[x & xs] (seq lat)]
+   (when-let [[x & xs] (seq lat)]
      (cond (= x old) (cons old (cons new xs))
            :else     (cons x (insertR new old xs))))))
 
@@ -92,7 +92,7 @@
 
 (defn insertL [new old lat]
   (lazy-seq
-   (let [[x & xs] (seq lat)]
+   (when-let [[x & xs] (seq lat)]
      (cond (= x old) (cons new lat)
            :else     (cons x (insertL new old xs))))))
 
@@ -108,7 +108,7 @@
 
 (defn subst [new old lat]
   (lazy-seq
-   (let [[x & xs] (seq lat)]
+   (when-let [[x & xs] (seq lat)]
      (cond (= x old) (cons new xs)
            :else     (cons x (subst new old xs))))))
 
@@ -124,15 +124,14 @@
 
 (defn subst2 [new o1 o2 lat]
   (lazy-seq
-   (let [[x & xs] (seq lat)]
-     (cond (or (= x o1) (= x o2)) (cons new xs)
-           :else                  (cons x (subst2 new o1 o2 xs))))))
+   (when-let [[x & xs] (seq lat)]
+     (cond (#{o1 o2} x) (cons new xs)
+           :else        (cons x (subst2 new o1 o2 xs))))))
 
 (comment
   ;; Non recursive version
   (defn subst2 [new o1 o2 lat]
-    (let [[x y] (split-with #(and (not= o1 %)
-                                  (not= o2 %)) lat)]
+    (let [[x y] (split-with #(not (#{o1 o2} %)) lat)]
       (concat x [new] (rest y)))))
 
 (comment
@@ -405,7 +404,7 @@
 
 (defn rempick [n lat]
   (lazy-seq
-   (let [[x & xs] (seq lat)]
+   (when-let [[x & xs] (seq lat)]
      (cond (zero? (dec n)) xs
            :else           (cons x (rempick (dec n) xs))))))
 
@@ -421,10 +420,9 @@
 
 (defn no-nums [lat]
   (lazy-seq
-   (let [[x & xs] (seq lat)]
-     (cond (empty? lat) lat
-           (number? x)  (no-nums xs)
-           :else        (cons x (no-nums xs))))))
+   (when-let [[x & xs] (seq lat)]
+     (cond (number? x) (no-nums xs)
+           :else       (cons x (no-nums xs))))))
 
 (comment
   ;; Non recursive versions
@@ -436,10 +434,9 @@
 
 (defn all-nums [lat]
   (lazy-seq
-   (let [[x & xs] (seq lat)]
-     (cond (empty? lat) lat
-           (number? x)  (cons x (all-nums xs))
-           :else        (all-nums xs)))))
+   (when-let [[x & xs] (seq lat)]
+     (cond (number? x) (cons x (all-nums xs))
+           :else       (all-nums xs)))))
 
 (comment
   ;; Non recursive versions
