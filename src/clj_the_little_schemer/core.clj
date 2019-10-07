@@ -492,3 +492,28 @@
      (rember* 'b '(((a b))
                    ((c) b)
                    (d ((e)) b)))))
+
+(defn insertR* [new old l]
+  (lazy-seq
+   (when-let [[x & xs] (seq l)]
+     (cond (= old x) (cons old (cons new (insertR* new old xs)))
+           (seq? x)  (cons (insertR* new old x) (insertR* new old xs))
+           :else     (cons x (insertR* new old xs))))))
+
+(comment
+  ;; Non recursive versions
+  (defn insertR* [new old l]
+    (clojure.walk/prewalk
+     (fn [x]
+       (if (seq? x)
+         (mapcat #(if (= % old) [% new] [%]) x)
+         x))
+     l)))
+
+(comment
+  (= '(((b z a b z))
+       ((c) b z)
+       (d ((e)) b z))
+     (insertR* 'z 'b '(((b a b))
+                       ((c) b)
+                       (d ((e)) b)))))
