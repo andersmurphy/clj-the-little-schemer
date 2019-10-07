@@ -456,7 +456,10 @@
 (comment
   ;; Non recursive versions
   (defn occur [a lat]
-    ((frequencies lat) a)))
+    ((frequencies lat) a))
+
+  (defn occur [a lat]
+    (count (filter #{a} lat))))
 
 (comment
   (= 4 (occur 'a '(a b c a b a a))))
@@ -517,3 +520,27 @@
      (insertR* 'z 'b '(((b a b))
                        ((c) b)
                        (d ((e)) b)))))
+
+(defn occur* [a l]
+  (letfn [(occur* [a l]
+            (lazy-seq
+             (when-let [[x & xs] (seq l)]
+               (cond (= a x)  (cons 1 (occur* a xs))
+                     (seq? x) (concat (occur* a x) (occur* a xs))
+                     :else    (occur* a xs)))))]
+    (count (occur* a l))))
+
+(comment
+  ;; Non recursive versions
+  (defn occur* [a l]
+    (->> (flatten l)
+         frequencies
+         a))
+
+  (defn occur* [a l]
+    (->> (flatten l)
+         (filter #{a})
+         count)))
+
+(comment
+  (= 6 (occur* 'a '(a (b (a)) (((c) a)) (a b a) a))))
