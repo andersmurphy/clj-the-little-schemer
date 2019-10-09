@@ -474,16 +474,16 @@
 (defn rember* [a l]
   (lazy-seq
    (when-let [[x & xs] (seq l)]
-     (cond (= a x)  (rember* a xs)
-           (seq? x) (cons (rember* a x) (rember* a xs))
-           :else    (cons x (rember* a xs))))))
+     (cond (= a x)         (rember* a xs)
+           (sequential? x) (cons (rember* a x) (rember* a xs))
+           :else           (cons x (rember* a xs))))))
 
 (comment
   ;; Non recursive versions
   (defn rember* [a l]
     (clojure.walk/prewalk
      (fn [x]
-       (if (seq? x)
+       (if (sequential? x)
          (remove #{a} x)
          x))
      l)))
@@ -499,16 +499,16 @@
 (defn insertR* [new old l]
   (lazy-seq
    (when-let [[x & xs] (seq l)]
-     (cond (= old x) (cons old (cons new (insertR* new old xs)))
-           (seq? x)  (cons (insertR* new old x) (insertR* new old xs))
-           :else     (cons x (insertR* new old xs))))))
+     (cond (= old x)       (cons old (cons new (insertR* new old xs)))
+           (sequential? x) (cons (insertR* new old x) (insertR* new old xs))
+           :else           (cons x (insertR* new old xs))))))
 
 (comment
   ;; Non recursive versions
   (defn insertR* [new old l]
     (clojure.walk/prewalk
      (fn [x]
-       (if (seq? x)
+       (if (sequential? x)
          (mapcat #(if (= % old) [% new] [%]) x)
          x))
      l)))
@@ -525,9 +525,9 @@
   (letfn [(occur* [a l]
             (lazy-seq
              (when-let [[x & xs] (seq l)]
-               (cond (= a x)  (cons 1 (occur* a xs))
-                     (seq? x) (concat (occur* a x) (occur* a xs))
-                     :else    (occur* a xs)))))]
+               (cond (= a x)         (cons 1 (occur* a xs))
+                     (sequential? x) (concat (occur* a x) (occur* a xs))
+                     :else           (occur* a xs)))))]
     (count (occur* a l))))
 
 (comment
@@ -548,16 +548,16 @@
 (defn subst* [new old l]
   (lazy-seq
    (when-let [[x & xs] (seq l)]
-     (cond (= old x) (cons new (subst* new old xs))
-           (seq? x)  (cons (subst* new old x) (subst* new old xs))
-           :else     (cons x (subst* new old xs))))))
+     (cond (= old x)       (cons new (subst* new old xs))
+           (sequential? x) (cons (subst* new old x) (subst* new old xs))
+           :else           (cons x (subst* new old xs))))))
 
 (comment
   ;; Non recursive versions
   (defn subst* [new old l]
     (clojure.walk/prewalk
      (fn [x]
-       (if (seq? x)
+       (if (sequential? x)
          (map #(if (= old %) new %) x)
          x))
      l)))
@@ -573,16 +573,16 @@
 (defn insertL* [new old l]
   (lazy-seq
    (when-let [[x & xs] (seq l)]
-     (cond (= old x) (cons new (cons old (insertL* new old xs)))
-           (seq? x)  (cons (insertL* new old x) (insertL* new old xs))
-           :else     (cons x (insertL* new old xs))))))
+     (cond (= old x)       (cons new (cons old (insertL* new old xs)))
+           (sequential? x) (cons (insertL* new old x) (insertL* new old xs))
+           :else           (cons x (insertL* new old xs))))))
 
 (comment
   ;; Non recursive versions
   (defn insertL* [new old l]
     (clojure.walk/prewalk
      (fn [x]
-       (if (seq? x)
+       (if (sequential? x)
          (mapcat #(if (= % old) [new %] [%]) x)
          x))
      l)))
@@ -600,9 +600,9 @@
             (lazy-seq
              (when-let [[x & xs] (seq l)]
                (cond
-                 (seq? x) (concat (member* a x) (member* a xs))
-                 (= a x)  (list true)
-                 :else    (member* a xs)))))]
+                 (sequential? x) (concat (member* a x) (member* a xs))
+                 (= a x)         (list true)
+                 :else           (member* a xs)))))]
     (first (member* a l))))
 
 (comment
