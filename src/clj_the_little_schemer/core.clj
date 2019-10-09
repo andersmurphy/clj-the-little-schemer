@@ -544,3 +544,76 @@
 
 (comment
   (= 6 (occur* 'a '(a (b (a)) (((c) a)) (a b a) a))))
+
+(defn subst* [new old l]
+  (lazy-seq
+   (when-let [[x & xs] (seq l)]
+     (cond (= old x) (cons new (subst* new old xs))
+           (seq? x)  (cons (subst* new old x) (subst* new old xs))
+           :else     (cons x (subst* new old xs))))))
+
+(comment
+  ;; Non recursive versions
+  (defn subst* [new old l]
+    (clojure.walk/prewalk
+     (fn [x]
+       (if (seq? x)
+         (map #(if (= old %) new %) x)
+         x))
+     l)))
+
+(comment
+  (= '(((a z))
+       ((c) z)
+       (d ((e)) z))
+     (subst* 'z 'b '(((a b))
+                     ((c) b)
+                     (d ((e)) b)))))
+
+(defn insertL* [new old l]
+  (lazy-seq
+   (when-let [[x & xs] (seq l)]
+     (cond (= old x) (cons new (cons old (insertL* new old xs)))
+           (seq? x)  (cons (insertL* new old x) (insertL* new old xs))
+           :else     (cons x (insertL* new old xs))))))
+
+(comment
+  ;; Non recursive versions
+  (defn insertL* [new old l]
+    (clojure.walk/prewalk
+     (fn [x]
+       (if (seq? x)
+         (mapcat #(if (= % old) [new %] [%]) x)
+         x))
+     l)))
+
+(comment
+  (= '(((z b a z b))
+       ((c) z b)
+       (d ((e)) z b))
+     (insertL* 'z 'b '(((b a b))
+                       ((c) b)
+                       (d ((e)) b)))))
+
+(defn member* [a l]
+  (letfn [(member* [a l]
+            (lazy-seq
+             (when-let [[x & xs] (seq l)]
+               (cond
+                 (seq? x) (concat (member* a x) (member* a xs))
+                 (= a x)  (list true)
+                 :else    (member* a xs)))))]
+    (first (member* a l))))
+
+(comment
+  ;; Non recursive versions
+  (defn member* [a l]
+    (->> (flatten l)
+         (some #{a})
+         boolean)))
+
+(comment
+  (= true
+     (member* 'c '(((b a b))
+                   ((c) b)
+                   (d ((e)) b)))))
