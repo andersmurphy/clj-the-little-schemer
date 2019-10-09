@@ -617,3 +617,19 @@
      (member* 'c '(((b a b))
                    ((c) b)
                    (d ((e)) b)))))
+
+(defn leftmost [[x]]
+  (cond (not (sequential? x)) x
+        :else                 (recur x)))
+
+(comment
+  ;; Non recursive versions
+  (defn leftmost [l]
+    (->> (flatten l)
+         first)))
+
+(comment
+  (= 'b
+     (leftmost '(((b a b))
+                 ((c) b)
+                 (d ((e)) b)))))
