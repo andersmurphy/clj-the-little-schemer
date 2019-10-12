@@ -1,7 +1,7 @@
 (ns clj-the-little-schemer.core)
 
 (defn atom? [l]
-  (not (list? l)))
+  (not (coll? l)))
 
 (comment
   (= true
@@ -633,3 +633,29 @@
      (leftmost '(((b a b))
                  ((c) b)
                  (d ((e)) b)))))
+
+(defn numbered? [aexp]
+  (letfn [(numbered? [aexp]
+            (lazy-seq
+             (cond
+               (and (not (coll? aexp))) (list (number? aexp))
+               :else                    (concat
+                                         (numbered? (first aexp))
+                                         (numbered?
+                                          (first (rest (rest aexp))))))))]
+    ;; Conceptual equivalent of apply and
+    (every? true? (numbered? aexp))))
+
+(comment
+  ;; Non recursive versions
+  (defn numbered? [aexp]
+    (->> (flatten [aexp])
+         (partition-all 2)
+         (map first)
+         (every? number?))))
+
+(comment
+  (= false (numbered? '(3 + (4 x 'bar))))
+  (= true (numbered? '(3 + (4 x 5))))
+  (= true (numbered? 3))
+  (= false (numbered? 'bar)))
