@@ -634,6 +634,13 @@
                  ((c) b)
                  (d ((e)) b)))))
 
+(defn big-nexp
+  ([n] (big-nexp '(2 + 2) n))
+  ([nexp n]
+   (if (= n 0)
+     nexp
+     (recur (list 2 '+ nexp) (dec n)))))
+
 (defn numbered? [aexp]
   (letfn [(numbered? [aexp]
             (lazy-seq
@@ -644,10 +651,13 @@
                                          (numbered?
                                           (first (rest (rest aexp))))))))]
     ;; Conceptual equivalent of apply and
+    ;; for very large values can run out of memory
     (every? true? (numbered? aexp))))
 
 (comment
   ;; Non recursive versions
+  ;; will stack overflow
+  ;; Might be holding on to head?
   (defn numbered? [aexp]
     (->> (flatten [aexp])
          (partition-all 2)
@@ -658,4 +668,47 @@
   (= false (numbered? '(3 + (4 x 'bar))))
   (= true (numbered? '(3 + (4 x 5))))
   (= true (numbered? 3))
-  (= false (numbered? 'bar)))
+  (= false (numbered? 'bar))
+  (= true (numbered? (big-nexp 10000))))
+
+(defn value [nexp]
+  ;; will stack overflow
+  (if (coll? nexp)
+    (let [[x1 x2 & [xs]] nexp]
+      (cond
+        (= x2 '+)    (+ (value x1)
+                        (value xs))
+        (= x2 '*)    (* (value x1)
+                        (value xs))
+        (= x2 'expt) (expt (value x1)
+                           (value xs))))
+    nexp))
+
+(comment
+  (defn value [nexp]
+    (letfn [(value [nexp]
+              (lazy-seq
+               (if-let [[x1 x2 & [xs]]
+                        (when (coll? nexp) nexp)]
+                 (cons x2 (cons x1 (if (not (coll? xs))
+                                     (list xs)
+                                     (list (value xs)))))
+                 (list nexp))))]
+      ;; eval will stack overflow
+      (eval (value nexp))))
+
+  ;; Non recursive versions
+  (defn value [nexp]
+    ;; prewalk will overflow before eval does
+    (-> (clojure.walk/prewalk
+         (fn [x]
+           (if (sequential? x)
+             (let [[x1 x2 & [xs]] x]
+               (list x2 x1 xs))
+             x))
+         nexp)
+        eval)))
+
+(comment
+  (= 164 (value '(2 * (1 + (3 expt 4)))))
+  (= 164 (value (big-nexp 1000000))))
