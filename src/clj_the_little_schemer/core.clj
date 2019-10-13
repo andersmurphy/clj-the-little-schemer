@@ -804,3 +804,18 @@
 (comment
   (= #{1 3} (set (intersect '(1 3 4) '(5 3 1))))
   (= #{} (set (intersect '(1 3) '(2 5)))))
+
+(defn union [set1 set2]
+  (lazy-seq
+   (let [[x & xs] (seq set1)]
+     (cond (empty? set1)    set2
+           (member? x set2) (union xs set2)
+           :else            (cons x (union xs set2))))))
+
+(comment
+  ;; Non recursive versions
+  (defn union [set1 set2]
+    (clojure.set/union (set set1) (set set2))))
+
+(comment
+  (= #{1 3 4 5} (set (union '(1 3 4) '(5 3 1)))))
