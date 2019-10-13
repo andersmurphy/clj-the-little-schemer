@@ -745,8 +745,7 @@
   (= '() (makeset '())))
 
 (defn subset? [set1 set2]
-  (let [[x & xs] set1
-        set2     set2]
+  (let [[x & xs] set1]
     (cond (empty? set1)    true
           (member? x set2) (recur xs set2)
           :else            false)))
@@ -775,8 +774,7 @@
 
 
 (defn intersect? [set1 set2]
-  (let [[x & xs] set1
-        set2     set2]
+  (let [[x & xs] set1]
     (cond (empty? set1)    false
           (member? x set2) true
           :else            (recur xs set2))))
@@ -791,3 +789,18 @@
 (comment
   (= true (intersect? '(1 3 4) '(5 3 1)))
   (= false (intersect? '(1 3) '(2 5))))
+
+(defn intersect [set1 set2]
+  (lazy-seq
+   (when-let [[x & xs] (seq set1)]
+     (cond (member? x set2) (cons x (intersect xs set2))
+           :else            (intersect xs set2)))))
+
+(comment
+  ;; Non recursive versions
+  (defn intersect [set1 set2]
+    (clojure.set/intersection (set set1) (set set2))))
+
+(comment
+  (= #{1 3} (set (intersect '(1 3 4) '(5 3 1))))
+  (= #{} (set (intersect '(1 3) '(2 5)))))
