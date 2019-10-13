@@ -712,3 +712,82 @@
 (comment
   (= 164 (value '(2 * (1 + (3 expt 4)))))
   (= 164 (value (big-nexp 1000000))))
+
+(defn my-set? [lat]
+  (let [[x & xs] lat]
+    (cond (nil? lat)     true
+          (member? x xs) false
+          :else          (recur xs))))
+
+(comment
+  ;; Non recursive versions
+  (defn my-set? [lat]
+    (distinct? lat)))
+
+(comment
+  (= true (my-set? '(1 2 3 4 5)))
+  (= false (my-set? '(1 2 2 4 5))))
+
+(defn makeset [lat]
+  (lazy-seq
+   (when-let [[x & xs] (seq lat)]
+     (cons x (makeset (multirember x xs))))))
+
+(comment
+  ;; Non recursive versions
+  (defn makeset [lat]
+    ;; Using set will change the order
+    ;; so we use distinct
+    (distinct lat)))
+
+(comment
+  (= '(1 2 4 5) (makeset '(1 2 2 4 4 2 5)))
+  (= '() (makeset '())))
+
+(defn subset? [set1 set2]
+  (let [[x & xs] set1
+        set2     set2]
+    (cond (empty? set1)    true
+          (member? x set2) (recur xs set2)
+          :else            false)))
+
+(comment
+  ;; Non recursive versions
+  (defn subset? [set1 set2]
+    (clojure.set/subset? (set set1) (set set2))))
+
+(comment
+  (= true (subset? '(1 3) '(1 2 3 4)))
+  (= false (subset? '(5 6) '(1 2 3 4))))
+
+(defn eqset? [set1 set2]
+  (and (subset? set1 set2)
+       (subset? set2 set1)))
+
+(comment
+  ;; Non recursive versions
+  (defn eqset? [set1 set2]
+    (= (set set1) (set set2))))
+
+(comment
+  (= true (eqset? '(1 3) '(3 1)))
+  (= false (eqset? '(1 3) '(3 1 2))))
+
+
+(defn intersect? [set1 set2]
+  (let [[x & xs] set1
+        set2     set2]
+    (cond (empty? set1)    false
+          (member? x set2) true
+          :else            (recur xs set2))))
+
+(comment
+  ;; Non recursive versions
+  (defn intersect? [set1 set2]
+    (not
+     (empty?
+      (clojure.set/intersection (set set1) (set set2))))))
+
+(comment
+  (= true (intersect? '(1 3 4) '(5 3 1)))
+  (= false (intersect? '(1 3) '(2 5))))
