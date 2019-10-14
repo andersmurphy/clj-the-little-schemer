@@ -803,7 +803,8 @@
 
 (comment
   (= #{1 3} (set (intersect '(1 3 4) '(5 3 1))))
-  (= #{} (set (intersect '(1 3) '(2 5)))))
+  (= #{} (set (intersect '(1 3) '(2 5))))
+  (= #{1} (set (intersect (repeat 10000000 1) (repeat 1000 1)))))
 
 (defn union [set1 set2]
   (lazy-seq
@@ -819,3 +820,35 @@
 
 (comment
   (= #{1 3 4 5} (set (union '(1 3 4) '(5 3 1)))))
+
+(defn difference [set1 set2]
+  (lazy-seq
+   (when-let [[x & xs] (seq set1)]
+     (cond (member? x set2) (difference xs set2)
+           :else            (cons x (difference xs set2))))))
+
+(comment
+  ;; Non recursive versions
+  (defn difference [set1 set2]
+    (clojure.set/difference (set set1) (set set2))))
+
+(comment
+  (= #{4} (set (difference '(1 3 4) '(5 3 1)))))
+
+(defn intersectall [l-set]
+  ;; Cuases stack overflow similar to
+  ;; https://stuartsierra.com/2015/04/26/clojure-donts-concat
+  (lazy-seq
+   (let [[x & xs] (seq l-set)]
+     (cond (empty? xs) x
+           :else       (intersect x (intersectall xs))))))
+
+(comment
+  ;; Non recursive versions
+  (defn intersectall [l-set]
+    (->> (map set l-set)
+         (apply clojure.set/intersection))))
+
+(comment
+  (= #{'a} (set (intersectall '((a  b c) ( c a  d e) ( e f g h a b)))))
+  (= #{'a} (set (intersectall (concat '((a)) (repeat 10000 '(a b)))))))
