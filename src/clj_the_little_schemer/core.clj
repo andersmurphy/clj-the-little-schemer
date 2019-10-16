@@ -722,7 +722,7 @@
 (comment
   ;; Non recursive versions
   (defn my-set? [lat]
-    (distinct? lat)))
+    (apply distinct? lat)))
 
 (comment
   (= true (my-set? '(1 2 3 4 5)))
@@ -852,3 +852,106 @@
 (comment
   (= #{'a} (set (intersectall '((a  b c) ( c a  d e) ( e f g h a b)))))
   (= #{'a} (set (intersectall (concat '((a)) (repeat 10000 '(a b)))))))
+
+(defn a-pair? [x]
+  (boolean
+   (when-let [[x1 x2 x3] (and (sequential? x) x)]
+     (and x1 x2 (nil? x3)))))
+
+(comment
+  ;; Non recursive versions
+  (defn a-pair? [x]
+    (= (when (sequential? x) (count x)) 2)))
+
+(comment
+  (= true  (a-pair? '(full (house))))
+  (= false  (a-pair? nil))
+  (= false  (a-pair? 1))
+  (= false  (a-pair? 'a))
+  (= false  (a-pair? '())))
+
+(defn build [s1 s2]
+  (cons s1 (cons s2 '())))
+
+(comment
+  (= '(1 2) (build 1 2)))
+
+(defn third [l]
+  (first (rest (rest l))))
+
+(comment
+  (nil? (third '(1 2)))
+  (= 3 (third '(1 2 3))))
+
+(defn fun? [rel]
+  (my-set? (firsts rel)))
+
+(comment
+  ;; Non recursive versions
+  (defn fun? [rel]
+    (->> (map first rel)
+         (apply distinct?))))
+
+(comment
+  (= true (fun? '((a 2) (b 4) (c 3))))
+  (= false (fun? '((a 2) (a 4) (c 3)))))
+
+(defn revpair [pair]
+  (build (second pair)
+         (first pair)))
+
+(comment
+  ;; Non recursive versions
+  (defn revpair [pair]
+    (reverse pair)))
+
+(comment
+  (= '(2 1) (revpair '(1 2))))
+
+(defn revrel [rel]
+  (lazy-seq
+   (when-let [[x & xs] (seq rel)]
+     (cons (revpair x) (revrel xs)))))
+
+(comment
+  ;; Non recursive versions
+  (defn revrel [rel]
+    (map reverse rel)))
+
+(comment
+  (= '((2 3) (2 1)) (revrel '((3 2) (1 2)))))
+
+(defn seconds [l]
+  (lazy-seq
+   (when-let [[x & xs] (seq l)]
+     (cons (second x)
+           (seconds xs)))))
+
+(comment
+  ;; Non recursive version
+  (defn seconds [l]
+    (map second l)))
+
+(comment
+  (= '(b d f)
+     (seconds '((a b) (c d) (e f)))))
+
+(defn fullfun? [fun]
+  (my-set? (seconds fun)))
+
+(comment
+  ;; Non recursive versions
+  (defn fullfun? [fun]
+    (->> (map second fun)
+         (apply distinct?))))
+
+(comment
+  (= true (fullfun? '((a 2) (b 4) (c 3))))
+  (= false (fullfun? '((a 2) (b 2) (c 3)))))
+
+(defn one-to-one? [fun]
+  (fun? (revrel fun)))
+
+(comment
+  (= true (one-to-one? '((a 2) (b 4) (c 3))))
+  (= false (one-to-one? '((a 2) (b 2) (c 3)))))
