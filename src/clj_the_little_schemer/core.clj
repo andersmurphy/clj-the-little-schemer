@@ -955,3 +955,20 @@
 (comment
   (= true (one-to-one? '((a 2) (b 4) (c 3))))
   (= false (one-to-one? '((a 2) (b 2) (c 3)))))
+
+(defn rember-f [test? a l]
+  (lazy-seq
+   (when-let [[x & xs] (seq l)]
+     (cond (test? x a) xs
+           :else       (cons x (rember-f test? a xs))))))
+
+(comment
+  ;; Non recursive version
+  (defn rember-f? [test? a l]
+    (let [[x y] (split-with
+                 #(complement (test? a %)) l)]
+      (concat x (rest y)))))
+
+(comment
+  (= '(a v d c) (rember-f = 'c '(a c v d c)))
+  (= '(a v d c) (rember-f = 'x '(a v d c))))
