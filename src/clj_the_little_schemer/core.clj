@@ -972,3 +972,11 @@
 (comment
   (= '(a v d c) (rember-f = 'c '(a c v d c)))
   (= '(a v d c) (rember-f = 'x '(a v d c))))
+
+
+(defn eq?-c [a]
+  (fn [x] (= a x)))
+
+(comment
+  (= true ((eq?-c 'salad) 'salad))
+  (= false ((eq?-c 'salad) 'bacon)))
