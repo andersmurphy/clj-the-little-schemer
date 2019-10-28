@@ -964,15 +964,14 @@
 
 (comment
   ;; Non recursive version
-  (defn rember-f? [test? a l]
+  (defn rember-f [test? a l]
     (let [[x y] (split-with
-                 #(complement (test? a %)) l)]
+                 #((complement test?) a %) l)]
       (concat x (rest y)))))
 
 (comment
   (= '(a v d c) (rember-f = 'c '(a c v d c)))
   (= '(a v d c) (rember-f = 'x '(a v d c))))
-
 
 (defn eq?-c [a]
   (fn [x] (= a x)))
@@ -980,3 +979,22 @@
 (comment
   (= true ((eq?-c 'salad) 'salad))
   (= false ((eq?-c 'salad) 'bacon)))
+
+(defn rember-f2 [test?]
+  (fn [a l]
+    (lazy-seq
+     (when-let [[x & xs] (seq l)]
+       (cond (test? x a) xs
+             :else       (cons x ((rember-f2 test?) a xs)))))))
+
+(comment
+  ;; Non recursive version
+  (defn rember-f2 [test?]
+    (fn [a l]
+      (let [[x y] (split-with
+                   #((complement test?) a %) l)]
+        (concat x (rest y))))))
+
+(comment
+  (= '(a v d c) ((rember-f2 =) 'c '(a c v d c)))
+  (= '(a v d c) ((rember-f2 =) 'x '(a v d c))))
