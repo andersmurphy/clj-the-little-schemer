@@ -998,3 +998,58 @@
 (comment
   (= '(a v d c) ((rember-f2 =) 'c '(a c v d c)))
   (= '(a v d c) ((rember-f2 =) 'x '(a v d c))))
+
+(defn insertL-f [test?]
+  (fn [new old lat]
+    (lazy-seq
+     (when-let [[x & xs] (seq lat)]
+       (cond (= x old) (cons new lat)
+             :else     (cons x ((insertL-f test?) new old xs)))))))
+
+(comment
+  ;; Non recursive version
+  (defn insertL-f [test?]
+    (fn [new old lat]
+      (let [[x y] (split-with #((complement test?) old %) lat)]
+        (concat x [new] y)))))
+
+(comment
+  (= '(ice cream with topping fudge for desert)
+     ((insertL-f =) 'topping 'fudge '(ice cream with fudge for desert))))
+
+(defn insertR-f [test?]
+  (fn [new old lat]
+    (lazy-seq
+     (when-let [[x & xs] (seq lat)]
+       (cond (= x old) (cons old (cons new xs))
+             :else     (cons x ((insertR-f test?) new old xs)))))))
+
+(comment
+  ;; Non recursive version
+  (defn insertR-f [test?]
+    (fn [new old lat]
+      (let [[x y] (split-with #((complement test?) old %) lat)]
+        (concat x [(first y) new] (rest y))))))
+
+(comment
+  (= '(ice cream with fudge topping for desert)
+     ((insertR-f =) 'topping 'fudge '(ice cream with fudge for desert))))
+
+(defn seqL [new old l]
+  (cons new (cons old l)))
+
+(defn seqR [new old l]
+  (cons old (cons new l)))
+
+(defn insert-g [s]
+  (fn [new old lat]
+    (lazy-seq
+     (when-let [[x & xs] (seq lat)]
+       (cond (= x old) (s new old xs)
+             :else     (cons x ((insert-g s) new old xs)))))))
+
+(comment
+  (= '(ice cream with topping fudge for desert)
+     ((insert-g seqL) 'topping 'fudge '(ice cream with fudge for desert)))
+  (= '(ice cream with fudge topping for desert)
+     ((insert-g seqR) 'topping 'fudge '(ice cream with fudge for desert))))
