@@ -1053,3 +1053,19 @@
      ((insert-g seqL) 'topping 'fudge '(ice cream with fudge for desert)))
   (= '(ice cream with fudge topping for desert)
      ((insert-g seqR) 'topping 'fudge '(ice cream with fudge for desert))))
+
+(defn seqS [new _ l]
+  (cons new l))
+
+(comment
+  (= '(ice cream with topping for desert)
+     ((insert-g seqS) 'topping 'fudge '(ice cream with fudge for desert))))
+
+(defn seqrem [_ _ l]
+  l)
+
+(defn yyy [a l]
+  ((insert-g seqrem) nil a l))
+
+(comment
+  (= '(pizza with and bacon) (yyy 'sausage '(pizza with sausage and bacon))))
