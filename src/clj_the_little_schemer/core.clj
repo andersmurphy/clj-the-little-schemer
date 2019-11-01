@@ -1069,3 +1069,12 @@
 
 (comment
   (= '(pizza with and bacon) (yyy 'sausage '(pizza with sausage and bacon))))
+
+(defn atom->function [x]
+  ({'+ +
+    '- -} x expt))
+
+(comment
+  (= 5 ((atom->function '+) 2 3))
+  (= -1 ((atom->function '-) 2 3))
+  (= 8 ((atom->function '?) 2 3)))
