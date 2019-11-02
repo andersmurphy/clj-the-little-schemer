@@ -713,6 +713,24 @@
   (= 164 (value '(2 * (1 + (3 expt 4)))))
   (= 164 (value (big-nexp 1000000))))
 
+(defn first-sub-exp [aexp]
+  (first (rest aexp)))
+
+(comment
+  (= 1 (first-sub-exp '(+ 1 2))))
+
+(defn second-sub-exp [aexp]
+  (first (rest (rest aexp))))
+
+(comment
+  (= 2 (second-sub-exp '(+ 1 2))))
+
+(defn operator [aexp]
+  (first aexp))
+
+(comment
+  (= '+ (operator '(+ 1 2))))
+
 (defn my-set? [lat]
   (let [[x & xs] lat]
     (cond (nil? lat)     true
