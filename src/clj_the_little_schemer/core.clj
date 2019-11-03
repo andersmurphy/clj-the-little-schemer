@@ -1090,9 +1090,20 @@
 
 (defn atom->function [x]
   ({'+ +
+    '* *
     '- -} x expt))
 
 (comment
   (= 5 ((atom->function '+) 2 3))
   (= -1 ((atom->function '-) 2 3))
   (= 8 ((atom->function '?) 2 3)))
+
+(defn value-2 [nexp]
+  (if (coll? nexp)
+    ((atom->function (operator nexp))
+     (value-2 (first-sub-exp nexp))
+     (value-2 (second-sub-exp nexp)))
+    nexp))
+
+(comment
+  (= 164 (value-2 '(* 2 (+ 1 (expt 3 4))))))
