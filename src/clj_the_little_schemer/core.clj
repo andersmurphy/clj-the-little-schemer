@@ -1107,3 +1107,24 @@
 
 (comment
   (= 164 (value-2 '(* 2 (+ 1 (expt 3 4))))))
+
+(defn multirember-f [test?]
+  (fn [a lat]
+    (lazy-seq
+     (when-let [[x & xs] (seq lat)]
+       (cond (= a x) ((multirember-f test?) a xs)
+             :else   (cons x ((multirember-f test?) a xs)))))))
+
+(comment
+  (= '(ice cream with fudge for desert)
+     ((multirember-f =) 'banana '(banana ice cream with banana fudge for desert))))
+
+(defn multiremberT [test? lat]
+  (lazy-seq
+   (when-let [[x & xs] (seq lat)]
+     (cond (test? x) (multiremberT test? xs)
+           :else     (cons x (multiremberT test? xs))))))
+
+(comment
+  (= '(ice cream with fudge for desert)
+     (multiremberT #{'banana} '(banana ice cream with banana fudge for desert))))
