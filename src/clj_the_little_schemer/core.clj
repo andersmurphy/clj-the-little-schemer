@@ -1128,3 +1128,30 @@
 (comment
   (= '(ice cream with fudge for desert)
      (multiremberT #{'banana} '(banana ice cream with banana fudge for desert))))
+
+(defn multirember&co [a lat col]
+  (let [[x & xs] lat]
+    (cond (nil? lat) (col '() '())
+          (= x a)    (recur
+                      a xs
+                      (fn [newlat seen]
+                        (col newlat
+                             (cons x seen))))
+          :else      (recur
+                      a xs
+                      (fn [newlat seen]
+                        (col (cons x newlat)
+                             seen))))))
+
+(comment
+  ;; Non recursive version
+  (defn multirember&co [a lat col]
+    (col (remove #{a} lat)
+         (filter #{a} lat))))
+
+(comment
+  (= 3
+     (multirember&co
+      'tuna
+      '(strawberries tuna and swordfish)
+      (fn [x y] (count x)))))
