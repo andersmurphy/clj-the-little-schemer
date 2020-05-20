@@ -1155,3 +1155,75 @@
       'tuna
       '(strawberries tuna and swordfish)
       (fn [x y] (count x)))))
+
+(defn multiinsertLR [new oldL oldR lat]
+  (lazy-seq
+   (when-let [[x & xs] (seq lat)]
+     (cond (= x oldL) (cons new (cons oldL (multiinsertLR new oldL oldR xs)))
+           (= x oldR) (cons oldR (cons new (multiinsertLR new oldL oldR xs)))
+           :else      (cons x (multiinsertLR new oldL oldR xs))))))
+
+(comment
+  ;; Non recursive version
+  (defn multiinsertLR [new oldL oldR lat]
+    (mapcat #(cond (= % oldL) [new %]
+                   (= % oldR) [% new]
+                   :else      [%])
+            lat)))
+
+(comment
+  (= '(vanilla ice cream with banana ice ice cream for desert)
+     (multiinsertLR 'ice 'cream 'banana '(vanilla cream with banana cream for desert))))
+
+(defn multiinsert&co [new oldL oldR lat col]
+  (if-let [[x & xs] (seq lat)]
+    (cond (= x oldL) (recur
+                      new oldL oldR xs
+                      (fn [newlat L R]
+                        (col (cons new (cons oldL newlat))
+                             (inc L) R)))
+          (= x oldR) (recur
+                      new oldL oldR xs
+                      (fn [newlat L R]
+                        (col (cons oldR (cons new newlat))
+                             L (inc R))))
+          :else      (recur
+                      new oldL oldR xs
+                      (fn [newlat L R]
+                        (col (cons x newlat)
+                             L R))))
+    (col '() 0 0)))
+
+(comment
+  ;; Example of what the above would produce
+  (let [new    'salty
+        oldL   'fish
+        oldR   'chips
+        newlat '(fish and chips)
+        col    list]
+    ((fn [newlat L R]
+       ((fn [newlat L R]
+          ((fn [newlat L R]
+             (col (cons new (cons oldL newlat))
+                  (inc L) R)) (cons 'and newlat)
+           L R))
+        (cons oldR
+              (cons new newlat))
+        L (inc R)))
+     '() 0 0)))
+
+(comment
+  ;; Non recursive version
+  (defn multiinsert&co [new oldL oldR lat col]
+    (apply col (reduce (fn [[newlat L R ] l]
+                         (cond (= l oldL) [(concat newlat [new l]) (inc L) R]
+                               (= l oldR) [(concat newlat [l new]) L (inc R)]
+                               :else      [(concat newlat [l]) L  R]))
+                       [[] 0 0]
+                       lat))))
+
+(comment
+
+  (= '((chips salty and salty fish or salty fish and chips salty) 2 2)
+     (multiinsert&co 'salty 'fish 'chips '(chips and fish or fish and chips)
+                     list)))
