@@ -1227,3 +1227,15 @@
   (= '((chips salty and salty fish or salty fish and chips salty) 2 2)
      (multiinsert&co 'salty 'fish 'chips '(chips and fish or fish and chips)
                      list)))
+
+;; (= (* (/ n 2) 2) n) doesn'it work in Clojure as it uses ratios.
+;; This implementation seems to rely on loss of precision.
+(defn my-even? [n] (even? n))
+
+(comment
+  ;; another implementation
+  (defn my-even? [n] (not (ratio? (/ n 2)))))
+
+(comment
+  (= (my-even? 2) true)
+  (= (my-even? 3) false))
