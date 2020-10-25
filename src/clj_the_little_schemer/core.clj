@@ -1228,7 +1228,7 @@
      (multiinsert&co 'salty 'fish 'chips '(chips and fish or fish and chips)
                      list)))
 
-;; (= (* (/ n 2) 2) n) doesn'it work in Clojure as it uses ratios.
+;; (= (* (/ n 2) 2) n) doesn't work in Clojure as it uses ratios.
 ;; This implementation seems to rely on loss of precision.
 (defn my-even? [n] (even? n))
 
@@ -1239,3 +1239,19 @@
 (comment
   (= (my-even? 2) true)
   (= (my-even? 3) false))
+
+(defn evens-only?* [l]
+  (lazy-seq
+   (when-let [[x & xs] (seq l)]
+     (cond (seq? x)      (cons (evens-only?* x) (evens-only?* xs))
+           (and (int? x) (even? x)) (cons x (evens-only?* xs))
+           :else         (evens-only?* xs)))))
+
+(comment
+  ;; Simpler version
+  (defn evens-only?* [l]
+    (clojure.walk/postwalk #(if (seq? %) (filter (some-fn seq? even?) %) %) l)))
+
+(comment
+  (= (evens-only?* '((9 1 2 8) 3 10 ((9 9) 7 6) 2))
+     '((2 8) 10 (() 6) 2)))
