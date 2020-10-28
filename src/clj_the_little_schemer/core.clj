@@ -1129,6 +1129,7 @@
   (= '(ice cream with fudge for desert)
      (multiremberT #{'banana} '(banana ice cream with banana fudge for desert))))
 
+;; note col means collector not collection
 (defn multirember&co [a lat col]
   (let [[x & xs] lat]
     (cond (nil? lat) (col '() '())
@@ -1175,6 +1176,7 @@
   (= '(vanilla ice cream with banana ice ice cream for desert)
      (multiinsertLR 'ice 'cream 'banana '(vanilla cream with banana cream for desert))))
 
+;; note col means collector not collection
 (defn multiinsert&co [new oldL oldR lat col]
   (if-let [[x & xs] (seq lat)]
     (cond (= x oldL) (recur
@@ -1243,8 +1245,8 @@
 (defn evens-only* [l]
   (lazy-seq
    (when-let [[x & xs] (seq l)]
-     (cond (seq? x)      (cons (evens-only* x) (evens-only* xs))
-           (and (int? x) (even? x)) (cons x (evens-only* xs))
+     (cond (and (int? x) (even? x)) (cons x (evens-only* xs))
+           (seq? x)      (cons (evens-only* x) (evens-only* xs))
            :else         (evens-only* xs)))))
 
 (comment
@@ -1255,3 +1257,30 @@
 (comment
   (= (evens-only* '((9 1 2 8) 3 10 ((9 9) 7 6) 2))
      '((2 8) 10 (() 6) 2)))
+
+;; note col means collector not collection
+(defn evens-only*&co [l col]
+  (lazy-seq
+   (if-let [[x & xs] (seq l)]
+     (cond (and (int? x) (even? x)) (evens-only*&co
+                                     xs
+                                     (fn [newl p s]
+                                       (col (cons x newl) (* x p) s)))
+           (seq? x) (evens-only*&co
+                     x
+                     (fn [al ap as]
+                       (evens-only*&co
+                        xs
+                        (fn [dl dp ds]
+                          (col (cons al dl) (* ap dp) (+ as ds))))))
+           :else (evens-only*&co
+                  xs
+                  (fn [newl p s] (col newl p (+ x s)))))
+     (col '() 1 0))))
+
+(defn the-last-friend [newl product sum]
+  (cons sum (cons product newl)))
+
+(comment
+  (= (evens-only*&co '((9 1 2 8) 3 10 ((9 9) 7 6) 2) the-last-friend)
+     '(38 1920 (2 8) 10 (() 6) 2)))
