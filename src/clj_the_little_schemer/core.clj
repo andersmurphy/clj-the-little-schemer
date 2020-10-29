@@ -1284,3 +1284,18 @@
 (comment
   (= (evens-only*&co '((9 1 2 8) 3 10 ((9 9) 7 6) 2) the-last-friend)
      '(38 1920 (2 8) 10 (() 6) 2)))
+
+;; sorn - symbol or number
+(defn keep-looking [a sorn lat]
+  (if (int? sorn)
+    (keep-looking a (pick sorn lat) lat)
+    (= sorn a)))
+
+(defn looking [a lat]
+  (keep-looking a (pick 1 lat)lat))
+
+(comment
+  (= (looking 'caviar '(6 2 4 caviar 5 7 3))
+     true)
+  (= (looking 'caviar '(6 2 "grit" caviar 5 7 3))
+     false))
