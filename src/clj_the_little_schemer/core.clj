@@ -1299,3 +1299,9 @@
      true)
   (= (looking 'caviar '(6 2 "grit" caviar 5 7 3))
      false))
+
+(defn eternity [x]
+  (eternity x))
+
+(comment
+  (eternity 1))
