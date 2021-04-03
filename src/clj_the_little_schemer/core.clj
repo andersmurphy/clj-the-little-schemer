@@ -1305,3 +1305,12 @@
 
 (comment
   (eternity 1))
+
+(defn shift [[[a b] c]]
+  [a [b c]])
+
+(comment
+  (= (shift '((a b) c))
+     '(a (b c)))
+  (= (shift '((a b) (c d)))
+     '(a (b (c d)))))
